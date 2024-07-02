@@ -3,7 +3,7 @@
 # Contributor: Moon Sungjoon <sumoon at seoulsaram dot org>
 # Contributor: Yurii Kolesnykov <root@yurikoles.com>
 
-pkgname=slack-electron
+pkgname=slack-electron-navfix
 pkgver=4.38.125
 pkgrel=1
 pkgdesc="Slack Desktop (Beta) for Linux, using the system Electron package"
@@ -52,6 +52,13 @@ prepare() {
   # limitation.
   sed -i 's|,"WebRTCPipeWireCapturer"|,"xxxxxxxxxxxxxxxxxxxxxx"|' \
     usr/lib/slack/resources/app.asar
+
+  # Fix mouse navigation buttons
+  # https://www.reddit.com/r/Slack/comments/qfodd7/when_i_press_back_on_a_mouse_in_the_slack_app_on/kxo523r/
+  navfix_pattern='s/'
+  navfix_pattern+='case"browser-backward":\(.0\)(-1,\(.\).webContents);break;case"browser-forward":.0(1,..webContents);break/'
+  navfix_pattern+='case"browser-backward":\1( 0,\2.webContents);break;case"browser-forward":\1(0,\2.webContents);break/'
+  sed -i "$navfix_pattern" usr/lib/slack/resources/app.asar
 }
 
 package() {
